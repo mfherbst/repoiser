@@ -20,6 +20,14 @@ usage() {
 	--keep-going
 	If configuring/making a repo fails, do not exit, but proceed to the next
 	on the list
+	Cancels the effect of -S, the last one counts.
+
+	-S
+	--no-keep-going
+	--strict
+	--stop
+	Stop compiling/making as soon as an error happens
+	Cancels the effect of a -k, the last one counts.
 
 	--tests
 	Always run the tests (even if no file changed during the make)
@@ -47,7 +55,7 @@ cleanup() {
 print_settings() {
 	cat <<- EOF
 	Options to configure:   $CONF_OPT
-	Options to make:        $MAKE_OPT  (use -n, -j to change)
+	Options to make:        $MAKE_OPT  (use -n, -j, -k, -S to change)
 
 	Reading repos from:     $CONFIGFILE
 	Repos considered and their order:      (use --exclude or --only to change):
@@ -66,6 +74,7 @@ die_or_keep_going() {
 
 FORCE_TESTS=n	# force running the tests even if no compilation took place
 KEEP_GOING=n	# keep running if errors occurr in compilation
+STRICT=n	# stop as soon as error happens
 NJOBS=$(noCPUs)			# number of jobs to use
 CONFIGFILE=$(default_config)	# config file to use
 EXCLUDE=""			# repos to exclude
@@ -82,6 +91,11 @@ while [ "$1" ]; do
 			;;
 		--keep-going|-k) 
 			KEEP_GOING=y
+			STRICT=n
+			;;
+		--no-keep-going|-S|--strict|--stop)
+			KEEP_GOING=n
+			STRICT=y
 			;;
 		--tests)
 			FORCE_TESTS=y
@@ -119,7 +133,12 @@ shift
 done
 
 # build the make options:
-MAKE_OPT="-j $NJOBS -k"
+MAKE_OPT="-j $NJOBS"
+if [ "$STRICT" == "y" ]; then
+	MAKE_OPT="$MAKE_OPT -S"
+else
+	MAKE_OPT="$MAKE_OPT -k"
+fi
 [ "$DRYRUN" == "y" ] && MAKE_OPT="$MAKE_OPT --dry-run"
 
 # get the list of repos we consider:
