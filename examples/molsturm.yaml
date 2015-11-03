@@ -1,0 +1,107 @@
+---
+# Checkout all repos required to compile molsturm
+
+# Some header data:
+version: "1.0"
+
+# Possible sources for the projects:
+sources: 
+        # format:
+        #    name: displayed name
+        #    type: svn or git
+        #    path_pattern: The pattern which gives the location of the repository root.
+        #                  The following variables are substituted:
+        #                             PROJECT:   by name of the project
+        #                             BRANCH:    by the path that directs a request to the appropriate branch
+        #                                        (eg branches/name for svn)
+        #    description: A short description
+
+        - &hd_svn !Source 
+                name: hd_svn
+                type: svn
+                path_pattern: "https://ccsvn.iwr.uni-heidelberg.de/svn/${PROJECT}"
+                description: "The ccsvn server in Heidelberg (Dreuw) with svn"
+
+        - &hd_git !Source 
+                name: hd_git
+                type: git
+                path_pattern: "ssh://gitte@ccsvn.iwr.uni-heidelberg.de:42022/${PROJECT}.git"
+                description: "The ccsvn server in Heidelberg (Dreuw) with git"
+
+        - &la_svn !Source 
+                name: la_svn
+                type: svn
+                path_pattern: "https://dumbeldore.usc.edu/svn/${PROJECT}"
+                description: "Dumbledore in LA (Krylov) with svn"
+
+# Project policies for the projects below
+# Many projects usually are checked out / built in the same manor, 
+# e.g. using the same source tree conventions, ... 
+# The checkout policies allow to specify some defaults for all these projects at once
+project_policies:
+        - &la_progs !ProjectPolicy
+                name: la_progs
+                description: Libraries and Projects from LA (Krylov)
+                branch:                     # default branch to use --- if not present: master(for git) or trunk(for svn)
+                source: *hd_git
+                #configure: "./configure"   # cmake or script relative to top of project with its options  #TODO implement this option
+
+        - &hd_progs !ProjectPolicy
+                name: hd_progs
+                description: Libraries and Projects from Heidelberg (Dreuw)
+                branch:                     # default branch to use --- if not present: master(for git) or trunk(for svn)
+                source: *hd_git
+                #configure: "./configure"   # cmake or script relative to top of project with its options  #TODO implement this option
+
+projects: 
+        - &libtest !Project 
+                name: libtest               # The name of the project
+                project_policy: *la_progs   # The checkout policy to use
+                dependencies:               # per default none
+                branch:                     # use a different branch that the one given in the project policy
+                is_enabled: True            # is the project enabled: Per default yes
+        
+        - &libutil !Project
+                name: libutil
+                project_policy: *la_progs
+                dependencies: 
+                        - *libtest 
+
+        - &libvmm !Project
+                name: libvmm
+                project_policy: *la_progs
+                dependencies: 
+                        - *libtest 
+                        - *libutil
+
+        - &libtensor !Project
+                name: libtensor
+                project_policy: *la_progs
+                dependencies:
+                        - *libtest
+                        - *libutil
+                        - *libvmm
+
+        - &libsolve !Project
+                name: libsolve
+                project_policy: *la_progs
+                dependencies:
+                        - *libtest
+                        - *libutil
+                        - *libvmm
+                        - *libtensor
+        - &molsturm !Project
+                name: molsturm
+                project_policy: *hd_progs
+                dependencies:
+                        - *libtest
+                        - *libutil 
+                        - *libvmm
+                        - *libtensor
+                        - *libsolve
+
+# The project we actually want to configure and build by default:
+default_projects: 
+        - *molsturm
+
+...
