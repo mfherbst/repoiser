@@ -94,7 +94,10 @@ fi
 # check if mr exists, we do not overwrite ...
 preliminary_checks
 
-$(dirname $0)/generate_mrconfig.py "$PROJ_YAML" > "$CONFIGFILE" || exit $?
+if ! $(dirname $0)/generate_mrconfig.py "$PROJ_YAML" > "$CONFIGFILE"; then
+	rm "$CONFIGFILE"
+	exit 1
+fi
 
 # Since generation was successful, store this
 echo "$CONFIGFILE" > .default_config
