@@ -1,5 +1,5 @@
 ---
-# Checkout all repos required to do adcman standalone
+# check out most recent version of all libraries and adcman / ccman2
 
 
 # Some header data:
@@ -44,7 +44,7 @@ project_policies:
                 name: la_progs
                 description: Libraries and Projects from LA (Krylov)
                 branch:                     # default branch to use --- if not present: master(for git) or trunk(for svn)
-                source: *hd_git
+                source: *la_svn
                 #configure: "./configure"   # cmake or script relative to top of project with its options  #TODO implement this option
 
         - &hd_progs !ProjectPolicy
@@ -108,6 +108,21 @@ projects:
                         - *libtensor
                         - *libctx
 
+        - &libcc  !Project
+                name: libcc
+                project_policy: *la_progs
+                dependencies:
+                        - *libtest
+                        - *libutil
+                        - *libvmm
+                        - *libtensor
+
+        - &liblegacy !Project
+                name: liblegacy
+                project_policy: *hd_progs
+                dependencies:
+                        - *libctx
+
         - &libadc !Project
                 name: libadc
                 project_policy: *hd_progs
@@ -136,9 +151,23 @@ projects:
                         - *libmo
                         - *libwfa
                         - *libadc
+        - &ccman2 !Project
+                name: ccman2
+                project_policy: *la_progs
+                dependencies:
+                        - *libtest
+                        - *libutil
+                        - *libvmm
+                        - *libtensor
+                        - *libctx
+                        - *libsolve
+                        - *libcc
+                        - *libmo
 
 # The project we actually want to configure and build by default:
 default_projects: 
         - *adcman
+        - *ccman2
+        - *liblegacy
 
 ...
