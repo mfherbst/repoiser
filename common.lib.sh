@@ -187,9 +187,8 @@ configure_repo() {
 			cd build
 			cmake $@ ..
 		fi
+		return $RET
 	)
-
-	return $RET
 }
 
 build_repo() {
@@ -222,11 +221,12 @@ build_repo() {
 
 		cd "$repo/build"
 		make $@
-		RET=$?
 	)
+	RET=$?
 	# do we have any updates:
 	find "$repo/build" -type f -newer "$TIMESTAMPFILE" -print -quit | grep -q "^" && BUILDANYTHING=1
 	rm "$TIMESTAMPFILE"
+	return $RET
 }
 
 run_test() {
@@ -240,7 +240,6 @@ run_test() {
 		exit 1
 	fi
 
-	local RET=0
 	local repo=$1
 
 	if [ ! -d "$repo" ]; then
@@ -249,6 +248,8 @@ run_test() {
 	fi
 
 	(
+		RET=0
+
 		echo
 		echo "#################################"
 		echo "#-- Testing $(basename "$repo")"
@@ -268,7 +269,6 @@ run_test() {
 			sleep 2
 			echo
 		done
+		return $RET
 	)
-
-	return $RET
 }
