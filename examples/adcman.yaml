@@ -35,6 +35,12 @@ sources:
                 path_pattern: "https://dumbeldore.usc.edu/svn/${PROJECT}"
                 description: "Dumbledore in LA (Krylov) with svn"
 
+        - &github_libwfa !Source
+                name: github
+                type: git
+                path_pattern: "https://github.com/libwfa/${PROJECT}.git"
+                description: "Libwfa user on github"
+
 # Project policies for the projects below
 # Many projects usually are checked out / built in the same manor, 
 # e.g. using the same source tree conventions, ... 
@@ -53,6 +59,12 @@ project_policies:
                 branch:                     # default branch to use --- if not present: master(for git) or trunk(for svn)
                 source: *hd_svn
                 #configure: "./configure"   # cmake or script relative to top of project with its options  #TODO implement this option
+
+        - &github_libwfa_progs !ProjectPolicy
+                name: github_libwfa_progs
+                description: Libraries and projects from github user libwfa
+                branch:
+                source: *github_libwfa
 
 projects: 
         - &libtest !Project 
@@ -119,7 +131,7 @@ projects:
 
         - &libwfa !Project
                 name: libwfa
-                project_policy: *hd_progs
+                project_policy: *github_libwfa_progs
                 dependencies:
                         - *libtest
 
