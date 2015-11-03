@@ -99,7 +99,7 @@ $(dirname $0)/generate_mrconfig.py "$PROJ_YAML" > "$CONFIGFILE" || exit $?
 # Since generation was successful, store this
 echo "$CONFIGFILE" > .default_config
 
-read -p "Should the repositories be checked out using \"mr update\"?  (Y/n)" RET
+read -p "Should the repositories be checked out using \"mr update --config $CONFIGFILE\"?  (Y/n)" RET
 [ -z "$RET" ] && RET="y"
 if [ "$RET" == "y" ]; then
 	mr --config "$CONFIGFILE" update
