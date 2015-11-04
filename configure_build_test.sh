@@ -32,6 +32,10 @@ usage() {
 	--tests
 	Always run the tests (even if no file changed during the make)
 
+	--doxygen
+	--docs
+	Build the doxygen documentation as well if it is available.
+
 	--dry-run
 	Only perform a dry run (print what is done, but don't do it)
 	(TODO: not fully implemented: Currently just prints a summary and exits)
@@ -54,10 +58,12 @@ cleanup() {
 
 print_settings() {
 	cat <<- EOF
-	Options to configure:   $CONF_OPT
-	Options to make:        $MAKE_OPT  (use -n, -j, -k, -S to change)
+	Options to configure:        $CONF_OPT
+	Options to make:             $MAKE_OPT  (use -n, -j, -k, -S to change)
+	Strict / keep going:         $STRICT / $KEEP_GOING    (use -S, -k to change)
+	Generate docs with doxygen:  $DOXYGEN        (use --docs to change)
 
-	Reading repos from:     $CONFIGFILE
+	Reading repos from:          $CONFIGFILE
 	Repos considered and their order:      (use --exclude or --only to change):
 	$(echo "$REPOS" | sed 's/^/    /')
 
@@ -82,6 +88,7 @@ ONLY=""				# only work on these repos
 CONF_OPT=""			# configure options
 MAKE_OPT="-j $NJOBS -k"		# make options
 DRYRUN="n"			# just have a dry run
+DOXYGEN=n			# build doxygen documentation
 
 while [ "$1" ]; do
 	case "$1" in 
@@ -112,6 +119,9 @@ while [ "$1" ]; do
 		--exclude)
 			shift
 			EXCLUDE="$1"
+			;;
+		--doxygen|--docs)
+			DOXYGEN=y
 			;;
 		--only)
 			shift
@@ -179,7 +189,11 @@ for repo in $REPOS; do
 		run_test "$repo"
 	else 
 		echo
-		echo "skipping tests for $repo (use test_all.sh for tests)"
+		echo "skipping tests for $repo (use --tests to force tests)"
+	fi
+
+	if [ "$DOXYGEN" == "y" ] && have_doxyfile "$repo"; then
+		run_doxygen "$repo"
 	fi
 done
 

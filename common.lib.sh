@@ -145,6 +145,38 @@ get_build_dir() {
 	echo "$1/build"
 }
 
+have_doxyfile() {
+	# Do we have a Doxyfile in the repo $1
+	# returns 0 if a unique doxyfile has been found
+	# returns 2 if multiple Doxyfiles have been found
+	# on other errors (e.g. no Doxyfile) returns 1
+	get_doxyfile "$1" > /dev/null
+}
+
+get_doxyfile() {
+	# Echo the name of the Doxyfile.
+	# return 0 if a unique doxyfile has been found
+	# return 2 if multiple Doxyfiles have been found
+	# on other errors (e.g. no Doxyfile) returns 1
+
+	local repo="$1"
+	[ ! -d "$repo" ] && return 1
+	(
+		cd "$repo"
+		DOXYFILE=$(find -name Doxyfile)
+		DOXYCOUNT=$(echo -n "$DOXYFILE" | grep -c "^")
+
+		if [[ $DOXYCOUNT -eq 0 ]]; then
+			return 1
+		elif [[ $DOXYCOUNT -gt 1 ]]; then
+			return 2
+		fi
+		echo "$DOXYFILE"
+		return 0
+	)
+}
+
+
 has_test_failed() {
 	# expect the output of the tests on stdin
 	# exit 1 if any of the tests failed
@@ -270,5 +302,50 @@ run_test() {
 			echo
 		done
 		return $RET
+	)
+}
+
+run_doxygen() {
+	# $1: folder containing the repository
+	# $2: options, e.g. "verbose" for verbose (full doxygen output shown)
+	# search for a Doxyfile and run doxygen with it
+
+	local repo=$1
+	local options="$2"
+
+	if [ ! -d "$repo" ]; then
+		echo "Could not find directory $repo" >&2
+		return 1
+	fi
+
+	if ! type doxygen &> /dev/null; then
+		echo "Could not find doxygen executable. Please install doxygen." >&2
+		return 1
+	fi
+
+	(
+		DOXYFILE=$(get_doxyfile "$repo")
+		cd "$repo"
+		case "$?" in
+			1)
+				echo "Could not find a Doxyfile in repo $repo" >&2
+				return 1
+				;;
+			2)
+				echo "Found more than one Doxyfile in repo $repo" >&2
+				return 1
+				;;
+		esac
+
+		echo
+		echo "###################################################"
+		echo "#-- Building doxygen docs for $(basename "$repo")"
+		echo "###################################################"
+		if [ "$options" == "verbose" ]; then
+			doxygen "$DOXYFILE"
+		else 
+			echo "Building docs may take a while, please be patient"
+			doxygen "$DOXYFILE" > /dev/null
+		fi
 	)
 }
