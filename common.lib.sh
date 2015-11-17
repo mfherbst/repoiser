@@ -15,7 +15,7 @@ die () {
 #
 cleanup_failedfile() {
 	if have_failedfile; then
-		FAILED=$(< $FAILEDFILE | sed 's/^/   /g')
+		FAILED=$(< $FAILEDFILE sed 's/^/   /g')
 		rm "$FAILEDFILE"
 	fi
 
