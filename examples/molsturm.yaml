@@ -16,11 +16,11 @@ sources:
         #                                        (eg branches/name for svn)
         #    description: A short description
 
-        - &hd_svn !Source 
-                name: hd_svn
-                type: svn
-                path_pattern: "https://ccsvn.iwr.uni-heidelberg.de/svn/${PROJECT}"
-                description: "The ccsvn server in Heidelberg (Dreuw) with svn"
+        - &github_lawrap !Source
+                name: github_lawrap
+                type: git
+                path_pattern: "https://github.com/linalgwrap/${PROJECT}.git"
+                description: "Linalgwrap project on github"
 
         - &hd_git !Source 
                 name: hd_git
@@ -28,77 +28,59 @@ sources:
                 path_pattern: "ssh://gitte@ccsvn.iwr.uni-heidelberg.de:42022/${PROJECT}.git"
                 description: "The ccsvn server in Heidelberg (Dreuw) with git"
 
-        - &la_svn !Source 
-                name: la_svn
-                type: svn
-                path_pattern: "https://dumbeldore.usc.edu/svn/${PROJECT}"
-                description: "Dumbledore in LA (Krylov) with svn"
-
 # Project policies for the projects below
 # Many projects usually are checked out / built in the same manor, 
 # e.g. using the same source tree conventions, ... 
 # The checkout policies allow to specify some defaults for all these projects at once
 project_policies:
-        - &la_progs !ProjectPolicy
-                name: la_progs
-                description: Libraries and Projects from LA (Krylov)
-                branch:                     # default branch to use --- if not present: master(for git) or trunk(for svn)
-                source: *hd_git
-                #configure: "./configure"   # cmake or script relative to top of project with its options  #TODO implement this option
-
         - &hd_progs !ProjectPolicy
                 name: hd_progs
                 description: Libraries and Projects from Heidelberg (Dreuw)
                 branch:                     # default branch to use --- if not present: master(for git) or trunk(for svn)
                 source: *hd_git
                 #configure: "./configure"   # cmake or script relative to top of project with its options  #TODO implement this option
+                
+        - &github_lawrap_progs !ProjectPolicy
+                name: github_lawrap_progs
+                description: Libraries and projects from github user linalgwrap
+                branch:
+                source: *github_lawrap
+                #configure: "./configure"   # cmake or script relative to top of project with its options  #TODO implement this option
 
 projects: 
-        - &libtest !Project 
-                name: libtest               # The name of the project
-                project_policy: *la_progs   # The checkout policy to use
-                dependencies:               # per default none
-                branch:                     # use a different branch that the one given in the project policy
-                is_enabled: True            # is the project enabled: Per default yes
-        
-        - &libutil !Project
-                name: libutil
-                project_policy: *la_progs
+        - &linalgwrap !Project
+                name: linalgwrap                      # The name of the project
+                project_policy: *github_lawrap_progs  # The checkout policy to use
+                dependencies:                         # per default none
+                branch:                               # use a different branch that the one given in the project policy
+                is_enabled: True                      # is the project enabled: Per default yes
+
+        - &sturm !Project
+                name: sturm
+                project_policy: *hd_progs
                 dependencies: 
-                        - *libtest 
+                        - *linalgwrap
 
-        - &libvmm !Project
-                name: libvmm
-                project_policy: *la_progs
+        - &gint !Project
+                name: gint
+                project_policy: *hd_progs
                 dependencies: 
-                        - *libtest 
-                        - *libutil
+                        - *linalgwrap
+                        - *sturm
 
-        - &libtensor !Project
-                name: libtensor
-                project_policy: *la_progs
-                dependencies:
-                        - *libtest
-                        - *libutil
-                        - *libvmm
+        - &gscf !Project
+                name: gscf
+                project_policy: *hd_progs
+                dependencies: 
+                        - *linalgwrap
+                        - *gint
 
-        - &libsolve !Project
-                name: libsolve
-                project_policy: *la_progs
-                dependencies:
-                        - *libtest
-                        - *libutil
-                        - *libvmm
-                        - *libtensor
         - &molsturm !Project
                 name: molsturm
                 project_policy: *hd_progs
-                dependencies:
-                        - *libtest
-                        - *libutil 
-                        - *libvmm
-                        - *libtensor
-                        - *libsolve
+                dependencies: 
+                        - *linalgwrap
+                        - *gscf
 
 # The project we actually want to configure and build by default:
 default_projects: 
