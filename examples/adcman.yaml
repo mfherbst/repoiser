@@ -60,6 +60,12 @@ project_policies:
                 source: *hd_svn
                 #configure: "./configure"   # cmake or script relative to top of project with its options  #TODO implement this option
 
+        - &mfh_repos !ProjectPolicy
+                name: mfh_repos
+                description: Libraries and Projects from Michael F. Herbst
+                branch:
+                source: *hd_git
+
         - &github_libwfa_progs !ProjectPolicy
                 name: github_libwfa_progs
                 description: Libraries and projects from github user libwfa
@@ -73,6 +79,7 @@ projects:
                 dependencies:               # per default none
                 branch:                     # use a different branch that the one given in the project policy
                 is_enabled: True            # is the project enabled: Per default yes
+                #directory:                 # The directory to checkout the project to. By default equal to name
         
         - &libutil !Project
                 name: libutil
@@ -105,10 +112,9 @@ projects:
                         - *libtensor
 
         - &libctx !Project
-                name: libctx
-                project_policy: *la_progs
-                dependencies:
-                        - *libtest
+                name: ctx
+                directory: libctx
+                project_policy: *mfh_repos
 
         - &libmo !Project
                 name: libmo
@@ -151,6 +157,6 @@ projects:
 
 # The project we actually want to configure and build by default:
 default_projects: 
-        - *adcman
+        - *libmo
 
 ...

@@ -139,6 +139,7 @@ class source(yaml.YAMLObject):
         Valid parameters are:
             PROJECT         The name of the project
             BRANCH          The branch to check out
+            DIRECTORY       The directory to checkout to.
 
         We substitute ${PARAMETER} --> value and add the branch directive
         """
@@ -149,7 +150,7 @@ class source(yaml.YAMLObject):
             string = string.replace("${" + subst + "}" ,str(params.get(subst)));
 
         # folder into which the checkout should happen
-        folder = params["PROJECT"]
+        folder = params["DIRECTORY"]
         
         if self.type == "git":
             string = "git clone '" + string + "' '" + folder + "'"
@@ -282,8 +283,9 @@ class project(yaml.YAMLObject,dependency_node.dependency_node):
     yaml_loader = yaml.SafeLoader
 
     def __getstate__(self):
-        return { "name": self.name, "project_policy":self.project_policy, "description": self.description, 
-                "dependencies" : list(self.dependencies), "branch" : self.branch };
+        return { "name": self.name, "directory": self.directory, "project_policy":self.project_policy, 
+                "description": self.description, "dependencies" : list(self.dependencies),
+                "branch" : self.branch };
 
     def __setstate__(self,state):
         # TODO see comment on Source above
@@ -291,6 +293,9 @@ class project(yaml.YAMLObject,dependency_node.dependency_node):
         try:
             key = "name"
             self.name = state[key]
+
+            key = "directory"
+            self.directory = state.get(key)
 
             key = "project_policy"
             self.project_policy = state[key]
@@ -322,9 +327,10 @@ class project(yaml.YAMLObject,dependency_node.dependency_node):
         self.is_enabled = is_enabled
 
     def __repr__(self):
-        str1 = "{0}(name={1}, project_policy={2}, description={3}, branch={4}, is_enabled={5}, dependencies=".format(
+        str1 = "{0}(name={1}, directory={2}, project_policy={3}, description={4}, branch={5}, is_enabled={6}, dependencies=".format(
                 self.__class__.__name__,
                 self.name,
+                self.directory,
                 self.project_policy,
                 self.description,
                 self.branch,
@@ -383,6 +389,23 @@ class project(yaml.YAMLObject,dependency_node.dependency_node):
         if not isinstance(val,str):
             raise TypeError("name can only be a string")
         self.__name = val
+
+    @property
+    def directory(self):
+        """The directory to checkout to"""
+        if self.__directory is None:
+            return self.__name
+        else:
+            return self.__directory
+
+    @directory.setter
+    def directory(self,val):
+        if val is None:
+            self.__directory = None
+        else:
+            if not isinstance(val,str):
+                raise TypeError("directory can only be a string")
+            self.__directory = val
 
     @property
     def project_policy(self):
@@ -462,7 +485,8 @@ class project(yaml.YAMLObject,dependency_node.dependency_node):
     def checkout_command(self):
         params = {
                 "BRANCH": self.branch,
-                "PROJECT": self.name
+                "PROJECT": self.name,
+                "DIRECTORY": self.directory,
                 }
         return self.project_policy.checkout_command(params);
 
