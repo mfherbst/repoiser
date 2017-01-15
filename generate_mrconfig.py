@@ -24,7 +24,7 @@ def build_mrconfig(projects):
 
     string=""
     for p in batches:
-        string += "[" + p.name + "]\n"
+        string += "[" + p.directory + "]\n"
         if p.description != "":
             string += "# " + p.description + "\n"
         string += "checkout = " + p.checkout_command() + "\n\n"

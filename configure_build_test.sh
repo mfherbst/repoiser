@@ -166,7 +166,7 @@ echo
 
 for repo in $REPOS; do
 	if [ ! -d "$repo" ]; then
-		default_die "Could not find directory $repo"
+		die "Could not find directory $repo"
 		continue
 	fi
 
