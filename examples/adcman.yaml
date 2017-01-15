@@ -157,6 +157,6 @@ projects:
 
 # The project we actually want to configure and build by default:
 default_projects: 
-        - *libmo
+        - *adcman
 
 ...
