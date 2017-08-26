@@ -112,9 +112,14 @@ projects:
                         - *libtensor
 
         - &libctx !Project
-                name: ctx
-                directory: libctx
-                project_policy: *mfh_repos
+                name: libctx
+                project_policy: *la_progs
+
+# TODO New replacement library my mfh
+#        - &libctx !Project
+#                name: ctx
+#                directory: libctx
+#                project_policy: *mfh_repos
 
         - &libmo !Project
                 name: libmo
