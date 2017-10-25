@@ -62,9 +62,8 @@ project_policies:
         - &hd_progs !ProjectPolicy
                 name: hd_progs
                 description: Libraries and Projects from Heidelberg (Dreuw)
-                branch:                     # default branch to use --- if not present: master(for git) or trunk(for svn)
+                branch:
                 source: *hd_svn
-                #configure: "./configure"   # cmake or script relative to top of project with its options  #TODO implement this option
 
         - &mfh_repos !ProjectPolicy
                 name: mfh_repos
@@ -81,9 +80,8 @@ project_policies:
         - &qchem_progs !ProjectPolicy
                 name: qchem_progs
                 description: Libraries and Projects from Q-Chem main dev server
-                branch:                     # default branch to use --- if not present: master(for git) or trunk(for svn)
+                branch:
                 source: *qchem_svn
-                #configure: "./configure"   # cmake or script relative to top of project with its options  #TODO implement this option
 
 projects: 
         - &libtest !Project 
