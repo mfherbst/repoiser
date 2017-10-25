@@ -35,6 +35,12 @@ sources:
                 path_pattern: "https://dumbeldore.usc.edu/svn/${PROJECT}"
                 description: "Dumbledore in LA (Krylov) with svn"
 
+        - &qchem_svn !Source 
+                name: qchem_svn
+                type: svn
+                path_pattern: "https://jubilee.q-chem.com/svnroot/${PROJECT}"
+                description: "Q-Chem main svn server, with qchem and external libraries"
+
         - &github_libwfa !Source
                 name: github
                 type: git
@@ -72,6 +78,13 @@ project_policies:
                 branch:
                 source: *github_libwfa
 
+        - &qchem_progs !ProjectPolicy
+                name: qchem_progs
+                description: Libraries and Projects from Q-Chem main dev server
+                branch:                     # default branch to use --- if not present: master(for git) or trunk(for svn)
+                source: *qchem_svn
+                #configure: "./configure"   # cmake or script relative to top of project with its options  #TODO implement this option
+
 projects: 
         - &libtest !Project 
                 name: libtest               # The name of the project
@@ -83,13 +96,13 @@ projects:
         
         - &libutil !Project
                 name: libutil
-                project_policy: *la_progs
+                project_policy: *qchem_progs
                 dependencies: 
                         - *libtest 
 
         - &libvmm !Project
                 name: libvmm
-                project_policy: *la_progs
+                project_policy: *qchem_progs
                 dependencies: 
                         - *libtest 
                         - *libutil
@@ -104,7 +117,7 @@ projects:
 
         - &libsolve !Project
                 name: libsolve
-                project_policy: *la_progs
+                project_policy: *qchem_progs
                 dependencies:
                         - *libtest
                         - *libutil
@@ -113,7 +126,7 @@ projects:
 
         - &libctx !Project
                 name: libctx
-                project_policy: *la_progs
+                project_policy: *qchem_progs
 
 # TODO New replacement library my mfh
 #        - &libctx !Project
@@ -123,7 +136,7 @@ projects:
 
         - &libmo !Project
                 name: libmo
-                project_policy: *la_progs
+                project_policy: *qchem_progs
                 dependencies:
                         - *libtest
                         - *libutil
