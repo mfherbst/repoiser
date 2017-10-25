@@ -98,13 +98,11 @@ projects:
                 name: libutil
                 project_policy: *qchem_progs
                 dependencies: 
-                        - *libtest 
 
         - &libvmm !Project
                 name: libvmm
                 project_policy: *qchem_progs
                 dependencies: 
-                        - *libtest 
                         - *libutil
 
         - &libtensor !Project
@@ -119,7 +117,6 @@ projects:
                 name: libsolve
                 project_policy: *qchem_progs
                 dependencies:
-                        - *libtest
                         - *libutil
                         - *libvmm
                         - *libtensor
