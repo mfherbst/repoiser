@@ -35,6 +35,12 @@ sources:
                 path_pattern: "https://dumbeldore.usc.edu/svn/${PROJECT}"
                 description: "Dumbledore in LA (Krylov) with svn"
 
+        - &qchem_svn !Source 
+                name: qchem_svn
+                type: svn
+                path_pattern: "https://jubilee.q-chem.com/svnroot/${PROJECT}"
+                description: "Q-Chem main svn server, with qchem and external libraries"
+
         - &github_libwfa !Source
                 name: github
                 type: git
@@ -56,9 +62,8 @@ project_policies:
         - &hd_progs !ProjectPolicy
                 name: hd_progs
                 description: Libraries and Projects from Heidelberg (Dreuw)
-                branch:                     # default branch to use --- if not present: master(for git) or trunk(for svn)
+                branch:
                 source: *hd_svn
-                #configure: "./configure"   # cmake or script relative to top of project with its options  #TODO implement this option
 
         - &mfh_repos !ProjectPolicy
                 name: mfh_repos
@@ -72,6 +77,12 @@ project_policies:
                 branch:
                 source: *github_libwfa
 
+        - &qchem_progs !ProjectPolicy
+                name: qchem_progs
+                description: Libraries and Projects from Q-Chem main dev server
+                branch:
+                source: *qchem_svn
+
 projects: 
         - &libtest !Project 
                 name: libtest               # The name of the project
@@ -83,15 +94,13 @@ projects:
         
         - &libutil !Project
                 name: libutil
-                project_policy: *la_progs
+                project_policy: *qchem_progs
                 dependencies: 
-                        - *libtest 
 
         - &libvmm !Project
                 name: libvmm
-                project_policy: *la_progs
+                project_policy: *qchem_progs
                 dependencies: 
-                        - *libtest 
                         - *libutil
 
         - &libtensor !Project
@@ -104,16 +113,15 @@ projects:
 
         - &libsolve !Project
                 name: libsolve
-                project_policy: *la_progs
+                project_policy: *qchem_progs
                 dependencies:
-                        - *libtest
                         - *libutil
                         - *libvmm
                         - *libtensor
 
         - &libctx !Project
                 name: libctx
-                project_policy: *la_progs
+                project_policy: *qchem_progs
 
 # TODO New replacement library my mfh
 #        - &libctx !Project
@@ -123,7 +131,7 @@ projects:
 
         - &libmo !Project
                 name: libmo
-                project_policy: *la_progs
+                project_policy: *qchem_progs
                 dependencies:
                         - *libtest
                         - *libutil
